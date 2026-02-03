@@ -1,0 +1,38 @@
+<article id="stackedArticle" class="mb-[30px] mt-[30px] mx-auto">
+    <h1 class="text-3xl font-bold mb-4 text-center">Three decades of death</h1>
+    <div class="flex flex-col items-center">
+        <section class="mb-6 lg:max-w-[600px] p-4 mx-auto">
+            <p class="mb-6 italic border-l-4 pl-4">
+                Stacked chart showing the number of reported deaths in Myanmar from 1989 to 2023. The data is presented either year by year or as a cumulative total. 
+            </p>
+            <p>
+                <strong class="underline">Important:</strong> the data used in this visualization comes from the UCDP conflict dataset, which has a very strict definition of what constitutes a conflict-related death.
+                As a result, the numbers shown in the chart are several times lower than those reported by other sources, such as ACLED. In fact, according to ACLED, the number of reported deaths in Myanmar just in the years from 2016 to 
+                2023 is several times higher at over 60000 deaths.
+            </p>
+        </section>
+        <div class="mb-3 text-xl flex flex-row items-center gap-4">
+            <input type="checkbox" id="toggleCumulativeStacked" class="w-[20px] h-[20px]">
+            <label for="toggleCumulativeStacked" class="cursor-pointer select-none">Toggle cumulative deaths</label>
+        </div>
+        <div id="stackedChartContainer" class="w-[95%] md:w-[90%] lg:w-[60%] h-max bg-white rounded-2xl p-3"></div>
+        <div id="cumulativeStackedChartContainer" class="w-[95%] md:w-[90%] lg:w-[60%] h-max bg-white rounded-2xl p-3" hidden></div>
+        <section class="mb-6 lg:max-w-[600px] p-4 mx-auto">
+            <p>
+                The data starts in the middle of the battles between the government and the KNU (Karen National Union) that escalated in 1984 and 
+                continued at a high level until the early 1990s.
+            </p>
+            <p class="mt-3">
+                In 2015 the first democratic elections were held in Myanmar after decades of military rule, where Aung San Suu Kyi's National League for Democracy (NLD) won a landslide victory.
+                This administration, however, was not wihout controversy:
+                in 2017 there is a noticeable spike in civilian deaths due to the military's crackdown on the Rohingya population in Rakhine State, in the western part of the country, 
+                constituting what is known as the <a class="underline text-blue-400" href="https://en.wikipedia.org/wiki/Rohingya_genocide">Rohingya genocide.</a>
+            </p>
+            <p class="mt-3">
+                In 2020 the NLD won the elections again with an even larger majority, but this result was disputed by the military, which led to the coup in February 2021.
+                The deposed administration organized itself as the National Unity Government (NUG), being recognized by Europe as the legitimate government, and called for civil disobedience against the military regime. Since then, the country has seen unprecedented levels of violence, with battles
+                now taking place in almost every state and region of Myanmar, as well as a significant increase in civilian deaths. 
+            </p>
+        </section>
+    </div>
+</article>

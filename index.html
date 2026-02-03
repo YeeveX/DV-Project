@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto+Slab:wght@100..900&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@100..900&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+    <link rel="stylesheet" href="src/css/style.css">
+
+    <script src="src/js/main.js" defer></script>    
+    <script src="src/js/symbolChart.js" defer></script>
+    <script src="src/js/waffleChart.js" defer></script>
+    <script src="src/js/stackedChart.js" defer></script>
+    <script src="src/js/choroplethChart.js" defer></script>
+    <script src="src/js/dumbbellChart.js" defer></script>
+    <title>Group &tau;</title>
+</head>
+<body class="bg-black p-2 flex flex-col relative text-white">
+    <header class="bg-yellow-400 p-4 rounded-t-2xl mb-0 text-center z-10">
+        <h1 class="text-4xl font-bold uppercase text-black">Myanmar</h1>
+    </header>
+
+    <img class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 z-10 pointer-events-none opacity-[0.03]"
+         src="star.png" alt="background star">
+    
+    <main class="grow bg-emerald-950 p-2" id="mainContent">
+    </main>
+    <nav class="fixed top-40 md:right-5 lg:right-5 xl:right-20 h-full overflow-auto hidden lg:block z-10">
+            <h2 class="text-2xl font-semibold mb-4">Navigation</h2>
+            <ul class="space-y-2">
+                <li><a href="#methodologyArticle" class="block px-3 py-10 bg-emerald-700 rounded hover:bg-emerald-600 transition-colors">Team & Methodology</a></li>
+                <li><a href="#symbolArticle" class="block px-3 py-10 bg-emerald-700 rounded hover:bg-emerald-600 transition-colors">Symbol Map</a></li>
+                <li><a href="#stackedArticle" class="block px-3 py-10 bg-emerald-700 rounded hover:bg-emerald-600 transition-colors">Stacked Bar Chart</a></li>
+                <li><a href="#waffleArticle" class="block px-3 py-10 bg-emerald-700 rounded hover:bg-emerald-600 transition-colors">Waffle Chart</a></li>
+                <li><a href="#choroplethArticle" class="block px-3 py-10 bg-emerald-700 rounded hover:bg-emerald-600 transition-colors">Choropleth</a></li>
+                <li><a href="#dumbbellArticle" class="block px-3 py-10 bg-emerald-700 rounded hover:bg-emerald-600 transition-colors">Dumbbell</a></li>
+            </ul>
+        </nav>
+
+    <footer class="bg-red-700 p-3 rounded-b-2xl text-center text-white z-10">
+        <p class="text-xs opacity-80">Group &tau; - Myanmar Data Visualization Project</p>
+    </footer>
+</body>
+</html>
