@@ -50,14 +50,31 @@ async function drawSymbolOnMap(svgPromise, data) {
         }
     }
 
-    const circlesGroup = svg.append("g")
-    .attr("class", "circles-group");
+    // const circlesGroup = svg.append("g")
+    // .attr("class", "circles-group");
+
+    //group data by side_b
+    const dataBySide = d3.group(data, d => d.side_b);
 
     // 3. Plot symbols
-    const circles = circlesGroup.selectAll("circle")
-        .data(data)
+
+    const sideGroup = svg.append("g")
+        .attr("class", "side-groups")
+        .selectAll("g")
+        .data(dataBySide)
+        .enter()
+        .append("g")
+        .attr("class", d => `side-group-${d[0]}`);
+
+    const circles = sideGroup.selectAll("circle")
+        .data(d => d[1])
         .enter()
         .append("circle")
+
+    // const circles = circlesGroup.selectAll("circle")
+    //     .data(data)
+    //     .enter()
+    //     .append("circle")
         .attr("cx", d => {
             const coords = window.mainProjection([parseFloat(d.longitude), parseFloat(d.latitude)]);
             return coords ? coords[0] : 0;
@@ -84,7 +101,10 @@ async function drawSymbolOnMap(svgPromise, data) {
         .attr("z-index", 1000);
 
     //on mouse over show tooltip with side_b and make other circles more transparent
-    svg.selectAll("circle").on("mouseover", function(event, d) {
+    sideGroup.selectAll("circle").on("mouseover", function(event, d) {
+        const parent = d3.select(this.parentNode);
+        parent.raise();
+
         // console.log("Mouse over on:", d);
         tooltip.transition()
             .style("opacity", .9);
@@ -94,18 +114,21 @@ async function drawSymbolOnMap(svgPromise, data) {
             .attr("side_b", d.side_b);
         d3.selectAll("circle")
             .transition()
-            .duration(100)
-            .attr("r", d => tooltip.attr("side_b") === d.side_b ? 5 : 2)
-            .attr("z-index", d => tooltip.attr("side_b") === d.side_b ? 5 : 3);
+            .duration(50)
+            .attr("r", d => tooltip.attr("side_b") === d.side_b ? 5 : 2);
+    })
+    .on("mousemove", function(event, d) {
+        tooltip.style("left", (event.pageX + 5) + "px")
+            .style("top", (event.pageY - 28) + "px");
     })
     .on("mouseout", function(d) {
         tooltip.transition()
+            .duration(0)
             .style("opacity", 0);
         d3.selectAll("circle")
             .transition()
             .duration(100)
-            .attr("r", 4)
-            .attr("z-index", 3);
+            .attr("r", 4);
     });
 
     
@@ -117,19 +140,31 @@ async function drawSymbolOnMap(svgPromise, data) {
             span.style.color = color;
             // console.log("Found paragraph for group:", span);
             span.addEventListener("mouseover", (e) => {
-                //  console.log("Mouse over paragraph for group:", group);
-                d3.selectAll("circle")
-                    .transition()
-                    .duration(100)
-                    .attr("r", d => d.side_b === group ? 5 : 2)
-                    .attr("z-index", d => d.side_b === group ? 5 : 3);
+                //dispatch mouseover event to first circle of that group
+                const firstCircle = svg.select(`.side-group-${group} circle`).node();
+                if (firstCircle) {
+                    const event = new MouseEvent("mouseover", {
+                        view: window,
+                        bubbles: true,
+                        cancelable: true
+                    });
+                    firstCircle.dispatchEvent(event);
+                }
+
+                // //  console.log("Mouse over paragraph for group:", group);
+                // d3.selectAll("circle")
+                //     .transition()
+                //     .duration(100)
+                //     .attr("r", d => d.side_b === group ? 5 : 2);
+                    
             });
             span.addEventListener("mouseout", () => {
                 d3.selectAll("circle")
                     .transition()
                     .duration(100)
                     .attr("r", 4)
-                    .attr("z-index", 3);
+                    .attr("z-index", 3)
+                    .attr("opacity", 1);
             });
         }
     }

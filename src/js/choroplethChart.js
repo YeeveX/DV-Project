@@ -68,8 +68,6 @@ window.addEventListener("waffleChartLoaded", () => {
         // console.log(svgPromise);
         const svg = await svgPromise;
 
-        console.log(dataMap);
-
         const maxValue = d3.max(data, d => dataMap(d).value);
         const colorScale = d3.scaleSequential()
             .domain([0, maxValue])
@@ -86,7 +84,6 @@ window.addEventListener("waffleChartLoaded", () => {
             .attr("fill", d => {
                 const admin1 = d.properties.ST;
                 const value = dataByAdmin.get(admin1) || 0;
-                console.log(`Admin1: ${admin1}, Value: ${value}`);
                 return colorScale(value);
             })
             .attr("stroke", "#333")
@@ -137,7 +134,6 @@ window.addEventListener("waffleChartLoaded", () => {
             .style("position", "absolute")
             .style("background", "#fff")
             .style("padding", "5px")
-            .style("border", "1px solid #999")
             .style("border-radius", "5px")
             .style("pointer-events", "none")
             .style("opacity", 0);

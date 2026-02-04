@@ -23,101 +23,124 @@ window.addEventListener("symbolChartLoaded", () => {
         }
     });
 
-    function drawStackedBarChart(data, containerId, cumulative=true) {
-        const container = d3.select(containerId);
-        const svg = container.append("svg")
-        .attr("viewBox", `0 0 1000 400`);
+    function drawStackedBarChart(data, containerId, cumulative = true) {
+    const container = d3.select(containerId);
+    container.selectAll("svg").remove();
 
-        const height = 400;
-        const width = 1000;
+    const height = 400;
+    const width = 1000;
+    const margins = { top: 40, right: 30, bottom: 60, left: 70 };
 
-        const margins = { top: 20, right: 30, bottom: 40, left: 60 };
+    const svg = container.append("svg")
+        .attr("viewBox", `0 0 ${width} ${height}`);
 
-        const xScale = d3.scaleBand()
-            .domain(data.map(d => d.year).sort(d3.ascending))
-            .range([margins.left, width - margins.right])
-            .padding(0.1);
+    // 1. DATA PREP
+    const years = [...new Set(data.map(d => d.year))].sort(d3.ascending);
+    const sides = [...new Set(data.map(d => d.side))];
+    const metric = cumulative ? "cumulative_deaths" : "total_deaths";
 
-        const colorScale = window.armedColorScale;
-            
-        const stackedData = d3.stack()
-            .keys(Array.from(new Set(data.map(d => d.side))))
-            .value((d, key) => {
-                const record = d.find(item => item.side === key);
-                return record ? (cumulative ? record.cumulative_deaths : record.total_deaths) : 0;
-            })(d3.group(data, d => d.year).values());
+    const pivotedData = years.map(year => {
+        const row = { year: year };
+        sides.forEach(side => {
+            const entry = data.find(d => d.year === year && d.side === side);
+            row[side] = entry ? entry[metric] : 0;
+        });
+        return row;
+    });
 
-        const yScale = d3.scaleLinear()
-            .domain([0, d3.max(stackedData, d => d3.max(d, d => d[1]))]).nice()
-            .range([height - margins.bottom, margins.top]);
+    const stackGenerator = d3.stack().keys(sides);
+    const stackedSeries = stackGenerator(pivotedData);
 
+    // Transpose to group by Year inside <g> elements
+    const dataByYear = years.map((year, i) => {
+        const yearSegments = stackedSeries.map(series => {
+            const segment = series[i];
+            segment.side = series.key; 
+            return segment;
+        });
+        yearSegments.year = year; // Attach year for positioning
+        return yearSegments;
+    });
 
-        // console.log(stackedData);
+    // 2. SCALES
+    const xScale = d3.scaleBand()
+        .domain(years)
+        .range([margins.left, width - margins.right])
+        .padding(0.2);
 
-        svg.append("g")
-            .attr("class", "grid")
-            .attr("transform", `translate(${margins.left},0)`)
-            .call(d3.axisLeft(yScale)
-                .tickSize(-width + margins.left + margins.right)
-                .tickFormat("")
-            )
-            .selectAll("line")
-            .attr("stroke", "#ccc")
-            .attr("stroke-dasharray", "2,2");
+    const yScale = d3.scaleLinear()
+        .domain([0, d3.max(pivotedData, d => d3.sum(sides, s => d[s]))]).nice()
+        .range([height - margins.bottom, margins.top]);
 
+    const colorScale = window.armedColorScale || d3.scaleOrdinal(d3.schemeCategory10).domain(sides);
 
-        const stacks = svg.append("g")
-            .selectAll("g")
-            .data(stackedData)
-            .enter().append("g")
-            .attr("fill", d => colorScale(d.key))
-            .selectAll("rect")
-            .data(d => d)
-            .enter().append("rect")
-            .attr("x", d => xScale(d.data[0].year))
-            .attr("y", d => yScale(d[1]))
-            .attr("height", d => yScale(d[0]) - yScale(d[1]))
-            .attr("width", xScale.bandwidth());
+    // 3. GRID LINES (Optional but helpful)
+    svg.append("g")
+        .attr("transform", `translate(${margins.left},0)`)
+        .attr("class", "grid")
+        .call(d3.axisLeft(yScale)
+            .tickSize(-width + margins.left + margins.right)
+            .tickFormat("")
+        )
+        .selectAll("line")
+        .attr("stroke", "#aaaaaa")
+        .attr("stroke-dasharray", "2,2");
 
-        //add total deaths labels on top of each stack
-        const deathsPerYear = d3.rollup(data, v => d3.sum(v, d => cumulative ? d.cumulative_deaths : d.total_deaths), d => d.year);
-        svg.append("g")
-            .selectAll("text")
-            .data(Array.from(deathsPerYear))
-            .enter().append("text")
-            .attr("x", d => xScale(d[0]) + xScale.bandwidth() / 2)
-            .attr("y", d => yScale(d[1]) - 5)
-            .attr("text-anchor", "middle")
-            .attr("font-size", "10px")
-            .attr("fill", "black")
-            .text(d => d[1]);
+    // 4. DRAW GROUPED STACKS
+    const yearGroups = svg.append("g")
+        .selectAll("g.year-stack")
+        .data(dataByYear)
+        .join("g")
+        .attr("class", "year-stack")
+        .attr("x", d => xScale(d.year))
+        .attr("transform", d => `translate(${xScale(d.year)},0)`);
 
-            
-        //add only years to x axis
-        const xAxis = g => g
-            .attr("transform", `translate(0,${height - margins.bottom})`)
-            .call(d3.axisBottom(xScale).tickValues(xScale.domain().filter((d, i) => !(i % 2))))
-            .selectAll("text")
-            .attr("color", "black")
-            .attr("transform", "rotate(-45)")
-            .attr("font-size", "14px")
-            .style("text-anchor", "end");
+    yearGroups.selectAll("rect")
+        .data(d => d)
+        .join("rect")
+        .attr("fill", d => colorScale(d.side))
+        .attr("x", 0)
+        .attr("y", d => yScale(d[1]))
+        .attr("height", d => yScale(d[0]) - yScale(d[1]))
+        .attr("width", xScale.bandwidth());
 
-        const yAxis = g => g
-            .attr("transform", `translate(${margins.left},0)`)
-            .attr("color", "black")
-            .call(d3.axisLeft(yScale))
-            .selectAll("text")
-            .attr("font-size", "14px");
-        svg.append("g").call(xAxis);
+    // 5. AXES
+    const xAxis = d3.axisBottom(xScale)
+        .tickValues(years.filter((d, i) => !(i % 2))); // Show every 2nd year for space
 
+    const yAxis = d3.axisLeft(yScale);
 
-        svg.append("g").call(yAxis);
+    // Render X Axis
+    svg.append("g")
+        .attr("transform", `translate(0,${height - margins.bottom})`)
+        .call(xAxis)
+        .selectAll("text")
+        .attr("transform", "rotate(-45)")
+        .style("text-anchor", "end")
+        .attr("font-size", "12px")
+        .attr("fill", "black");
 
-        //legend
+    // Render Y Axis
+    svg.append("g")
+        .attr("transform", `translate(${margins.left},0)`)
+        .call(yAxis)
+        .selectAll("text")
+        .attr("font-size", "12px")
+        .attr("fill", "black");
+
+    // Y Axis Label
+    svg.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", margins.left / 4)
+        .attr("x", -(height / 2))
+        .attr("text-anchor", "middle")
+        .attr("font-size", "14px")
+        .text(cumulative ? "Cumulative Deaths" : "Total Deaths");
+
+         //legend
+
         const legend = svg.append("g")
             .attr("transform", `translate(${70},${margins.top})`);
-
         const legendItems = Array.from(new Set(data.map(d => d.side)));
 
         legend.selectAll("rect")
@@ -140,6 +163,102 @@ window.addEventListener("symbolChartLoaded", () => {
             .attr("font-size", "12px")
             .text(d => d);
 
-        console.log("Stacked Chart JS loaded");
-    }
+    //add total stack value labels on top of each stack
+    yearGroups.append("text")
+        .attr("x", xScale.bandwidth() / 2)
+        .attr("y", d => yScale(d3.sum(sides, s => {
+            const segment = d.find(seg => seg.side === s);
+            return segment ? segment[1] - segment[0] : 0;
+        })) - 5)
+        .attr("text-anchor", "middle")
+        .attr("font-size", "10px")
+        .attr("fill", "black")
+        .text(d => d3.sum(sides, s => {
+            const segment = d.find(seg => seg.side === s);
+            return segment ? segment[1] - segment[0] : 0;
+        }));
+    
+    //tooltips
+    const tooltip = d3.select("body").append("div")
+        .attr("class", "tooltip")
+        .style("position", "absolute")
+        .style("background", "#f9f9f9")
+        .style("padding", "5px")
+        .style("border", "1px solid #d3d3d3")
+        .style("color", "#333")
+        .style("border-radius", "5px")
+        .style("pointer-events", "none")
+        .style("opacity", 0);
+
+    //highlight entire stack on hover
+    yearGroups.on("mouseover", function(event, d) {
+        //make all other stacks more transparent
+        d3.selectAll(".year-stack").selectAll("rect")
+            .transition()
+            .duration(50)
+            .attr("opacity", 0.3);
+        //highlight current stack
+        d3.select(this).selectAll("rect")
+            .transition()
+            .duration(0)
+            .attr("opacity", 1);
+        //show tooltip breakdown by side
+        
+        const breakdown = sides.map(s => {
+            const segment = d.find(seg => seg.side === s);
+            const value = segment ? segment[1] - segment[0] : 0;
+            return `<strong style="color: ${colorScale(s)}">${s}:</strong> ${value}`;
+        });
+
+        //2 cols table
+        let tabular = '<table style="width: 220px;">';
+        breakdown.forEach((row, i) => {
+            if (i % 2 === 0) {
+                tabular += '<tr>';
+            }
+            tabular += `<td style="padding: 0px 5px;">${row}</td>`;
+            if (i % 2 === 1) {
+                tabular += '</tr>';
+            }
+        });
+        tabular += '</table>';
+
+        function getOffset(el) {
+            const rect = el.getBoundingClientRect();
+            return {
+                left: rect.left + window.scrollX,
+                top: rect.top + window.scrollY
+            };
+        }
+        const offset = getOffset(svg.node());
+        let xPos = offset.left + xScale(d.year) * 1.1;
+        if (d.year > years[Math.floor(years.length / 2)]) {
+            xPos -= (220 + xScale.bandwidth()); //shift left for right half years
+        }
+        else{
+            xPos += xScale.bandwidth() + 10; //shift right for left half years
+        }
+        const yPos = offset.top + 160;
+
+        console.log(offset.left, xScale(d.year));
+
+        tooltip.html(`<strong>Year: ${d.year}</strong><br/>${tabular}`)
+            .style("left", (xPos) + "px")
+            .style("top", (yPos) + "px")
+            .transition()
+            .duration(200)
+            .style("opacity", 0.9);
+    })
+    .on("mouseout", function(event, d) {
+        d3.selectAll(".year-stack").selectAll("rect")
+            .transition()
+            .duration(100)
+            .attr("opacity", 1);
+        tooltip.transition()
+            .duration(100)
+            .style("opacity", 0);
+    });
+
+    console.log("Grouped-by-year chart with axes rendered.");
+}
 });
