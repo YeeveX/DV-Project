@@ -70,6 +70,7 @@ async function drawSymbolOnMap(svgPromise, data) {
         .data(d => d[1])
         .enter()
         .append("circle")
+        .attr("class", "battle-circle")
 
     // const circles = circlesGroup.selectAll("circle")
     //     .data(data)
@@ -100,6 +101,31 @@ async function drawSymbolOnMap(svgPromise, data) {
         .style("opacity", 0)
         .attr("z-index", 1000);
 
+    const legendData = "1 dot = 1 battle";
+    const legend = svg.append("g")
+        .attr("class", "legend")
+        .attr("transform", `translate(20, 430)`);
+    const dot = legend.selectAll("circle")
+        .data([legendData])
+        .enter()
+        .append("circle")
+        .attr("cx", 0)
+        .attr("cy", 0)
+        .attr("r", 4)
+        .attr("fill", "white")
+        .attr("stroke", "#333")
+        .attr("stroke-width", 0.5);
+    const legendText = legend.selectAll("text")
+        .data([legendData])
+        .enter()
+        .append("text")
+        .attr("x", 10)
+        .attr("y", 4)
+        .text(d => d)
+        .attr("font-size", "12px")
+        .attr("fill", "white")
+        //border
+
     //on mouse over show tooltip with side_b and make other circles more transparent
     sideGroup.selectAll("circle").on("mouseover", function(event, d) {
         const parent = d3.select(this.parentNode);
@@ -112,7 +138,7 @@ async function drawSymbolOnMap(svgPromise, data) {
             .style("left", (event.pageX + 5) + "px")
             .style("top", (event.pageY - 28) + "px")
             .attr("side_b", d.side_b);
-        d3.selectAll("circle")
+        d3.selectAll(".battle-circle")
             .transition()
             .duration(50)
             .attr("r", d => tooltip.attr("side_b") === d.side_b ? 5 : 2);
@@ -125,13 +151,12 @@ async function drawSymbolOnMap(svgPromise, data) {
         tooltip.transition()
             .duration(0)
             .style("opacity", 0);
-        d3.selectAll("circle")
+        d3.selectAll(".battle-circle")
             .transition()
             .duration(100)
             .attr("r", 4);
     });
 
-    
     for (const group of groups) {
         // console.log(`Group: ${group}, Color: ${colorScale(group)}`);
         if (armyParaIds.includes(group)) {
@@ -159,7 +184,7 @@ async function drawSymbolOnMap(svgPromise, data) {
                     
             });
             span.addEventListener("mouseout", () => {
-                d3.selectAll("circle")
+                d3.selectAll(".battle-circle")
                     .transition()
                     .duration(100)
                     .attr("r", 4)

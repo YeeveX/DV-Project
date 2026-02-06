@@ -235,7 +235,7 @@ window.addEventListener("choroplethChartLoaded", () => {
         .attr("viewBox", `0 0 800 400`);
         const width = 800;
         const height = 400;
-        const margins = { top: 20, right: 20, bottom: 10, left: 100 };
+        const margins = { top: 60, right: 20, bottom: 10, left: 100 };
         const chartWidth = width - margins.left - margins.right;;
         const chartHeight = height - margins.top - margins.bottom;
         const chartGroup = svg.append("g")
@@ -260,5 +260,60 @@ window.addEventListener("choroplethChartLoaded", () => {
             // Update chart with new data
             updateDumbbellChart(chartGroup, chartHeight, chartWidth, selectedSeries, data);
         });
+
+        //add generic legend
+        const circlesData = [
+            { label: "2020", color: "blue" },
+            { label: "2021", color: "orange" },
+        ];
+        const legend = svg.append("g")
+            .attr("class", "legend")
+            .attr("transform", `translate(${margins.left}, ${margins.top - 40})`);
+        legend.selectAll("circle")
+            .data(circlesData)
+            .enter()
+            .append("circle")
+            .attr("cx", (d, i) => i * 70)
+            .attr("cy", 0)
+            .attr("r", 8)
+            .attr("fill", d => d.color)
+    
+        legend.selectAll("text")
+            .data(circlesData)
+            .enter()
+            .append("text")
+            .attr("x", (d, i) => i * 70 + 12)
+            .attr("y", 4)
+            .text(d => d.label)
+            .attr("font-size", "12px")
+            .attr("fill", "#333");
+
+        const lineLegendData = [
+            { label: "Increase from 2020 to 2021", color: "green" },
+            { label: "Decrease from 2020 to 2021", color: "red" },
+        ];
+
+        const lineLegend = svg.append("g")
+            .attr("class", "line-legend")
+            .attr("transform", `translate(${margins.left + 200}, ${margins.top - 40})`);
+        lineLegend.selectAll("line")
+            .data(lineLegendData)
+            .enter()
+            .append("line")
+            .attr("x1", (d, i) => i * 200)
+            .attr("y1", 5)
+            .attr("x2", (d, i) => i * 200 + 180)
+            .attr("y2", 5)
+            .attr("stroke", d => d.color)
+            .attr("stroke-width", 5);
+        lineLegend.selectAll("text")
+            .data(lineLegendData)
+            .enter()
+            .append("text")
+            .attr("x", (d, i) => i * 200 + 18)
+            .attr("y", 0)
+            .text(d => d.label)
+            .attr("font-size", "12px")
+            .attr("fill", "#333");
     }
 });

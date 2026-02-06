@@ -127,6 +127,12 @@ window.addEventListener("waffleChartLoaded", () => {
         legendSvg.append("g")
             .attr("transform", `translate(${legendWidth}, 0)`)
             .call(legendAxis);
+        legendSvg.append("text")
+            .attr("x", 0)
+            .attr("y", -15)
+            .attr("font-size", "12px")
+            .attr("fill", "white")
+            .text(legendTitle);
 
         //add tooltip
         const tooltip = d3.select("body").append("div")

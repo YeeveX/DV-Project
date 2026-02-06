@@ -75,7 +75,8 @@ async function drawMap(containerId, sizeToMatchId) {
                         .attr("x", nw[0])
                         .attr("y", nw[1])
                         .attr("width", se[0] - nw[0])
-                        .attr("height", Math.abs(se[1] - nw[1]));
+                        .attr("height", Math.abs(se[1] - nw[1]))
+                        .attr("class", "rounded");
 
                     // //clip tiles to the map area
                     // d3.select(this)
@@ -142,19 +143,13 @@ async function drawMap(containerId, sizeToMatchId) {
 }
 
 async function loadSections() {
-    const sections = ['methodology', 'symbol', 'stacked', 'waffle', 'choropleth', 'dumbbell'];
+    const sections = ['intro', 'symbol', 'stacked', 'waffle', 'choropleth', 'dumbbell', 'methodology'];
     for (const section of sections) {
         const response = await fetch(`${section}.html`);
         let html = await response.text();
-        html += `<hr class="my-8 w-[600px] mx-auto">`;
+        if (section != sections[sections.length - 1])
+            html += `<hr class="my-8 w-[600px] mx-auto">`;
         document.getElementById("mainContent").innerHTML += html;
-
-        // const jsResponse = await fetch(`src/js/${section}Chart.js`);
-        // const jsCode = await jsResponse.text();
-        // document.body.appendChild(document.createElement('script')).text = jsCode;
-
-        // if (section === 'symbol') return;
-        // eval(jsCode);
     }
 
     const loadedEvent = new Event("sectionsLoaded");
@@ -197,6 +192,28 @@ function setupArmiesColors(){
     colorScale.domain(armyParaIds);
     window.armedColorScale = colorScale;
 }
+
+window.addEventListener('scroll', () => {
+    const main = document.querySelector('main');
+    if (!main) return;
+
+    const mainRect = main.getBoundingClientRect();
+    const progressBar_id = document.querySelector('#progressBar_id');
+    if (!progressBar_id) return;
+
+    if (mainRect.top >= 0)
+      progressBar_id.style.height = `0%`;
+    else if (mainRect.bottom <= 0)
+      progressBar_id.style.height = `100%`;
+    else
+    {
+      //main lerp from 0 -> main_max = mainRect.height - window.innerHeight
+      const progress = Math.min(100, Math.max(0, (Math.abs(mainRect.top) / (mainRect.height - window.innerHeight)) * 100));
+      progressBar_id.style.top = `${mainRect.top}px`;
+      progressBar_id.style.height = `${progress}%`;
+    }
+});
+
 // function updateMainArticle(pageName)
 // {
 //     fetch(`${pageName}.html`)

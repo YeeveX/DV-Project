@@ -18,6 +18,8 @@ window.addEventListener("stackedChartLoaded", () => {
         const tileSize = 40;
         const tilesPerRow = 10;
 
+        const tilePadding = 2;
+
         const colors = d3.scaleOrdinal()
             .domain(data.map(d => d.type))
             .range(["#888888", "#ee3333"]);
@@ -42,13 +44,13 @@ window.addEventListener("stackedChartLoaded", () => {
             .data(tileData)
             .enter()
             .append("rect")
-            .attr("x", d => d.x)
-            .attr("y", d => d.y)
+            .attr("x", d => d.x + tilePadding)
+            .attr("y", d => d.y + tilePadding)
             //add radius to make it look better
-            .attr("rx", 4)
-            .attr("ry", 4)
-            .attr("width", tileSize - 2) // 2px gap
-            .attr("height", tileSize - 2) // 2px gap
+            .attr("rx", tilePadding*2)
+            .attr("ry", tilePadding*2)
+            .attr("width", tileSize - 2 * tilePadding) // 2px gap
+            .attr("height", tileSize - 2 * tilePadding) // 2px gap
             .attr("fill", d => colors(d.type))
             .attr("stroke", "#fff")
             .attr("stroke-width", 1);
@@ -70,6 +72,15 @@ window.addEventListener("stackedChartLoaded", () => {
                 tooltip.html(`${d.type}<br/>Absolute: ${datum.absolute}<br/>Percentage: ${Math.round(datum.percentage)}%`)
                     .style("left", (event.pageX + 10) + "px")
                     .style("top", (event.pageY - 28) + "px");
+
+                //select all tiles of the same type and make them bigger
+                svg.selectAll("rect")
+                    .transition()
+                    .duration(100)
+                    .attr("x", d => d.x + (d.type === datum.type ? tilePadding / 2 : tilePadding))
+                    .attr("y", d => d.y + (d.type === datum.type ? tilePadding / 2 : tilePadding))
+                    .attr("width", d => d.type === datum.type ? tileSize - tilePadding : tileSize - 2 * tilePadding)
+                    .attr("height", d => d.type === datum.type ? tileSize - tilePadding : tileSize - 2 * tilePadding);
             })
             .on("mousemove", (event) => {
                 tooltip.style("left", (event.pageX + 10) + "px")
@@ -77,6 +88,12 @@ window.addEventListener("stackedChartLoaded", () => {
             })
             .on("mouseout", () => {
                 tooltip.transition().duration(500).style("opacity", 0);
+                svg.selectAll("rect")                    .transition()
+                    .duration(100)
+                    .attr("x", d => d.x + tilePadding)
+                    .attr("y", d => d.y + tilePadding)
+                    .attr("width", tileSize - 2 * tilePadding)
+                    .attr("height", tileSize - 2 * tilePadding);
             });
 
     }

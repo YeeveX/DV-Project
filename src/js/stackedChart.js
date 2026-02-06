@@ -13,14 +13,55 @@ window.addEventListener("symbolChartLoaded", () => {
         window.dispatchEvent(new Event("stackedChartLoaded"));
     });
 
-    toggleCumulativeStacked.addEventListener("change", (event) => {
-        if (event.target.checked) {
-            document.getElementById("cumulativeStackedChartContainer").style.display = "block";
-            document.getElementById("stackedChartContainer").style.display = "none";
-        } else {
-            document.getElementById("cumulativeStackedChartContainer").style.display = "none";
-            document.getElementById("stackedChartContainer").style.display = "block";
-        }
+    const showYearByYearBtn = document.getElementById("showYearByYearBtn");
+    const showCumulativeBtn = document.getElementById("showCumulativeBtn");
+
+    const yearByYearStacked = document.getElementById("stackedChartContainer");
+    const cumulativeStacked = document.getElementById("cumulativeStackedChartContainer");
+
+
+    // toggleCumulativeStacked.addEventListener("change", (event) => {
+    //     if (event.target.checked) {
+    //         .style.display = "block";
+    //         document.getElementById("stackedChartContainer").style.display = "none";
+    //     } else {
+    //         document.getElementById("cumulativeStackedChartContainer").style.display = "none";
+    //         document.getElementById("stackedChartContainer").style.display = "block";
+    //     }
+    // });
+
+    showYearByYearBtn.addEventListener("click", () => {
+        yearByYearStacked.style.display = "block";
+        cumulativeStacked.style.display = "none";
+
+        showYearByYearBtn.classList.add("bg-blue-500");
+        showYearByYearBtn.classList.remove("bg-gray-500");
+        showYearByYearBtn.classList.remove("hover:bg-gray-400");
+
+        showCumulativeBtn.classList.remove("bg-blue-500");
+        showCumulativeBtn.classList.add("bg-gray-500");
+        showCumulativeBtn.classList.add("hover:bg-gray-400");
+
+        showYearByYearBtn.disabled = true;
+        showCumulativeBtn.disabled = false;
+    });
+
+    showCumulativeBtn.addEventListener("click", () => {
+        yearByYearStacked.style.display = "none";
+        cumulativeStacked.style.display = "block";
+        
+        showCumulativeBtn.classList.add("bg-blue-500");
+        showCumulativeBtn.classList.remove("bg-gray-500");
+        showCumulativeBtn.classList.remove("hover:bg-gray-400");
+
+
+        showYearByYearBtn.classList.remove("bg-blue-500");
+        showYearByYearBtn.classList.add("bg-gray-500");
+        showYearByYearBtn.classList.add("hover:bg-gray-400");
+        
+
+        showCumulativeBtn.disabled = true;
+        showYearByYearBtn.disabled = false;
     });
 
     function drawStackedBarChart(data, containerId, cumulative = true) {
@@ -140,7 +181,7 @@ window.addEventListener("symbolChartLoaded", () => {
          //legend
 
         const legend = svg.append("g")
-            .attr("transform", `translate(${70},${margins.top})`);
+            .attr("transform", `translate(${90},${23})`);
         const legendItems = Array.from(new Set(data.map(d => d.side)));
 
         legend.selectAll("rect")
