@@ -8,3 +8,7 @@ h1, h2, h3, h4, h5, h6 {
     font-family: 'Roboto Slab', sans-serif;
     font-weight: 600;
 }
+
+.small_caps {
+    font-variant: small-caps;
+}
