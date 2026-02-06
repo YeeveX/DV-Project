@@ -156,9 +156,7 @@ async function loadSections() {
     window.dispatchEvent(loadedEvent);
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-    loadSections();
-
+window.addEventListener("dumbbellChartLoaded", () => {
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
@@ -173,6 +171,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             });
         });
+    });
+
+document.addEventListener("DOMContentLoaded", () => {
+    loadSections();
 });
 
 function setupArmiesColors(){

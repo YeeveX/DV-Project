@@ -36,6 +36,7 @@ window.addEventListener("choroplethChartLoaded", () => {
         });
 
         drawDumbbellChart(data, "#dumbbellChartContainer");
+        
         window.dispatchEvent(new Event("dumbbellChartLoaded"));
     });
 
