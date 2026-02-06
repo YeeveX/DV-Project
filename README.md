@@ -1,9 +1,9 @@
 # Group Tau DV Project
 ## Data sources
- - [https://acleddata.com/aggregated/aggregated-data-asia-pacific](ACLED Asia-Pacific aggegated dataset).
- - [https://databank.worldbank.org/reports.aspx?source=2&country=MMR#](World Bank Myanmar data export).
- - [https://ucdp.uu.se/country/775](Uppsala Conflict Data Program (UCDP)) for extra conflict information.
- - [https://www.openstreetmap.org/](Open Street Map) for the tiles and GeoJSON.
+ - [ACLED Asia-Pacific aggegated dataset](https://acleddata.com/aggregated/aggregated-data-asia-pacific).
+ - [World Bank Myanmar data export](https://databank.worldbank.org/reports.aspx?source=2&country=MMR#).
+ - [Uppsala Conflict Data Program (UCDP)](https://ucdp.uu.se/country/775) for extra conflict information.
+ - [Open Street Map](https://www.openstreetmap.org/) for the tiles and GeoJSON.
 ## Data & Preprocessing
 All the data is stored in the data folder.
 In data/geo there are the map tiles together with the GeoJSON information.
