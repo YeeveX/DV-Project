@@ -53,9 +53,9 @@ window.addEventListener("choroplethChartLoaded", () => {
             }
         }
 
-        // Sort data by 2020 values
+        //Sort data by 2020 values
         filteredData.sort((a, b) => d3.descending(+a.Y2020, +b.Y2020));
-        // Scales
+        //Scales
         const xScale = d3.scaleLinear()
             .domain([0, d3.max(filteredData, d => Math.max(+d.Y2020, +d.Y2021))])
             .range([0, chartWidth]);
@@ -83,7 +83,7 @@ window.addEventListener("choroplethChartLoaded", () => {
             .attr("class", "y-axis")
             .call(yAxis);
 
-        // Dumbbell lines
+        //Dumbbell lines
         chartGroup.selectAll(".dumbbell-line")
             .data(filteredData)
             .enter()
@@ -96,7 +96,7 @@ window.addEventListener("choroplethChartLoaded", () => {
             .attr("stroke", d => +d.Y2021 > +d.Y2020 ? "green" : "red")
             .attr("stroke-width", 5);
 
-        // Circles for 2020
+        //Circles for 2020
         chartGroup.selectAll(".circle-2020")
             .data(filteredData)
             .enter()
@@ -107,8 +107,20 @@ window.addEventListener("choroplethChartLoaded", () => {
             .attr("r", 5)
             .attr("fill", "blue")
             .attr("opacity", d => isNaN(+d.Y2020) ? 0 : 1); // Hide circles if value is NaN
+        //add text labels for 2020 values
+        chartGroup.selectAll(".label-2020")
+            .data(filteredData)
+            .enter()
+            .append("text")
+            .attr("class", "label-2020")
+            .attr("x", d => xScale(+d.Y2020))
+            .attr("y", d => yScale(d.country) + yScale.bandwidth() / 2 - 10)
+            .text(d => isNaN(+d.Y2020) ? "" : formatTick(+d.Y2020))
+            .attr("font-size", "10px")
+            .attr("fill", "blue")
+            .attr("text-anchor", "middle");
 
-        // Circles for 2021
+        //Circles for 2021
         chartGroup.selectAll(".circle-2021")
             .data(filteredData)
             .enter()
@@ -119,6 +131,18 @@ window.addEventListener("choroplethChartLoaded", () => {
             .attr("r", 5)
             .attr("fill", "orange")
             .attr("opacity", d => isNaN(+d.Y2021) ? 0 : 1);
+        //add text labels for 2021 values
+        chartGroup.selectAll(".label-2021")
+            .data(filteredData)
+            .enter()
+            .append("text")
+            .attr("class", "label-2021")
+            .attr("x", d => xScale(+d.Y2021))
+            .attr("y", d => yScale(d.country) + yScale.bandwidth() / 2 + 15)
+            .text(d => isNaN(+d.Y2021) ? "" : formatTick(+d.Y2021))
+            .attr("font-size", "10px")
+            .attr("fill", "orange")
+            .attr("text-anchor", "middle");
 
         //add N/A labels for missing data
         chartGroup.selectAll(".na-label")
@@ -161,7 +185,7 @@ window.addEventListener("choroplethChartLoaded", () => {
                 .attr("fill", "#ffff99")
                 .lower();
             
-                //add gray bands for every other row
+            //add gray bands for every other row
             chartGroup.selectAll(".gray-band")
 
                 .data(filteredData)
@@ -190,7 +214,6 @@ window.addEventListener("choroplethChartLoaded", () => {
             //select all circles and lines for tooltip interaction
             chartGroup.selectAll("circle, .dumbbell-line")
                 .on("mouseover", function(event, d) {
-                    //write both year values in tooltip
                     const year2020 = +d.Y2020;
                     const year2021 = +d.Y2021;
                     tooltip.transition()
@@ -201,7 +224,6 @@ window.addEventListener("choroplethChartLoaded", () => {
                         .style("top", (event.pageY-5) + "px")
                         .attr("class", "translate-x-[-50%] translate-y-[-100%]");
 
-                    //other circle
                     chartGroup.selectAll("circle")
                         .filter(circleData => circleData.country === d.country)
                         .attr("r", 8);
@@ -248,17 +270,13 @@ window.addEventListener("choroplethChartLoaded", () => {
         const dumbbellCategoriesSelect = document.getElementById("dumbbellCategoriesSelect");
         dumbbellCategoriesSelect.addEventListener("change", function() {
             const selectedSeries = this.value;
-            // Clear previous chart
             chartGroup.selectAll("*").remove();
-            // Update chart with new data
             updateDumbbellChart(chartGroup, chartHeight, chartWidth, selectedSeries, data);
         });
 
         excludeSKCheckbox.addEventListener("change", function() {
             const selectedSeries = dumbbellCategoriesSelect.value;
-            // Clear previous chart
             chartGroup.selectAll("*").remove();
-            // Update chart with new data
             updateDumbbellChart(chartGroup, chartHeight, chartWidth, selectedSeries, data);
         });
 
