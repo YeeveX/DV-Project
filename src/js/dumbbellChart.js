@@ -2,16 +2,16 @@ window.addEventListener("choroplethChartLoaded", () => {
     const excludeSKCheckbox = document.getElementById("excludeSKCheck");
     const dataPath = 'data/chart/5/countries_indicators.csv';
 
-    const categoryDescriptions = {
-        "NY.GDP.MKTP.CD": "The total market value of all final goods and services produced within the country in a given year.",
-        "SP.POP.TOTL": "The total number of people residing in the country.",
-        "NY.GDP.PCAP.CD": "The average economic output per person, calculated by dividing the country's GDP by its total population.",
-        "NV.AGR.TOTL.CD": "The total value of all agricultural products and services produced within the country in a given year.",
-        "GE.PER.RNK": "A composite measure of the quality of public services, the civil service, and the credibility of the government's commitment to its policies. A rank of 90 means it performs better than 90% of other countries.",
-        "NV.IND.TOTL.CD": "The total value of all industrial products and services produced within the country in a given year.",
-        "TX.VAL.MRCH.CD.WT": "The total value of all goods and services exported by the country to other countries in a given year.",
-        "TM.VAL.MRCH.CD.WT": "The total value of all goods and services imported by the country from other countries in a given year.",
-        "MS.MIL.XPND.GD.ZS": "The percentage of the country's GDP that is spent on the military and defense.",
+    let categoryDescriptions = {
+        "NY.GDP.MKTP.CD": {unit: "USD", desc: "The total market value of all final goods and services produced within the country in a given year."},
+        "SP.POP.TOTL": { unit: "People", desc: "The total number of people residing in the country."},
+        "NY.GDP.PCAP.CD": { unit: "USD", desc: "The average economic output per person, calculated by dividing the country's GDP by its total population."},
+        "NV.AGR.TOTL.CD": { unit: "USD", desc: "The total value of all agricultural products and services produced within the country in a given year."},
+        "GE.PER.RNK": { unit: "Percentile", desc: "A composite measure of the quality of public services, the civil service, and the credibility of the government's commitment to its policies. A rank of 90 means it performs better than 90% of other countries."},
+        "NV.IND.TOTL.CD": { unit: "USD", desc: "The total value of all industrial products and services produced within the country in a given year."},
+        "TX.VAL.MRCH.CD.WT": { unit: "USD", desc: "The total value of all goods and services exported by the country to other countries in a given year."},
+        "TM.VAL.MRCH.CD.WT": { unit: "USD", desc: "The total value of all goods and services imported by the country from other countries in a given year."},
+        "MS.MIL.XPND.GD.ZS": { unit: "%", desc: "The percentage of the country's GDP that is spent on the military and defense."},
     };
     const categoryParagraph = document.getElementById("dumbbellCategoryDescription");
 
@@ -33,6 +33,7 @@ window.addEventListener("choroplethChartLoaded", () => {
             option.value = series.SeriesCode;
             option.text = series.Series;
             dumbbellCategoriesSelect.appendChild(option);
+            categoryDescriptions[series.SeriesCode].shortName = series.Series;
         });
 
         drawDumbbellChart(data, "#dumbbellChartContainer");
@@ -248,7 +249,14 @@ window.addEventListener("choroplethChartLoaded", () => {
                         .attr("stroke-width", 5);
                 });
             
-            categoryParagraph.innerHTML = categoryDescriptions[selectedSeries] || "";
+            categoryParagraph.innerHTML = categoryDescriptions[selectedSeries].desc || "";
+
+            chartGroup.append("text")
+                .attr("x", chartWidth / 2)
+                .attr("y", -30)
+                .attr("text-anchor", "middle")
+                .attr("font-size", "12px")
+                .text(categoryDescriptions[selectedSeries] ? `${categoryDescriptions[selectedSeries].shortName}` : "");
         }
     }
 
@@ -258,7 +266,7 @@ window.addEventListener("choroplethChartLoaded", () => {
         .attr("viewBox", `0 0 800 400`);
         const width = 800;
         const height = 400;
-        const margins = { top: 60, right: 20, bottom: 10, left: 100 };
+        const margins = { top: 80, right: 20, bottom: 10, left: 100 };
         const chartWidth = width - margins.left - margins.right;;
         const chartHeight = height - margins.top - margins.bottom;
         const chartGroup = svg.append("g")
@@ -287,7 +295,7 @@ window.addEventListener("choroplethChartLoaded", () => {
         ];
         const legend = svg.append("g")
             .attr("class", "legend")
-            .attr("transform", `translate(${margins.left}, ${margins.top - 40})`);
+            .attr("transform", `translate(${margins.left}, ${15})`);
         legend.selectAll("circle")
             .data(circlesData)
             .enter()
@@ -314,7 +322,7 @@ window.addEventListener("choroplethChartLoaded", () => {
 
         const lineLegend = svg.append("g")
             .attr("class", "line-legend")
-            .attr("transform", `translate(${margins.left + 200}, ${margins.top - 40})`);
+            .attr("transform", `translate(${margins.left + 200}, ${15})`);
         lineLegend.selectAll("line")
             .data(lineLegendData)
             .enter()

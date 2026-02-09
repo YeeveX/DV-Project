@@ -75,7 +75,6 @@ window.addEventListener("symbolChartLoaded", () => {
     const svg = container.append("svg")
         .attr("viewBox", `0 0 ${width} ${height}`);
 
-    // 1. DATA PREP
     const years = [...new Set(data.map(d => d.year))].sort(d3.ascending);
     const sides = [...new Set(data.map(d => d.side))];
     const metric = cumulative ? "cumulative_deaths" : "total_deaths";
@@ -92,18 +91,16 @@ window.addEventListener("symbolChartLoaded", () => {
     const stackGenerator = d3.stack().keys(sides);
     const stackedSeries = stackGenerator(pivotedData);
 
-    // Transpose to group by Year inside <g> elements
     const dataByYear = years.map((year, i) => {
         const yearSegments = stackedSeries.map(series => {
             const segment = series[i];
             segment.side = series.key; 
             return segment;
         });
-        yearSegments.year = year; // Attach year for positioning
+        yearSegments.year = year; 
         return yearSegments;
     });
 
-    // 2. SCALES
     const xScale = d3.scaleBand()
         .domain(years)
         .range([margins.left, width - margins.right])
@@ -115,7 +112,6 @@ window.addEventListener("symbolChartLoaded", () => {
 
     const colorScale = window.armedColorScale || d3.scaleOrdinal(d3.schemeCategory10).domain(sides);
 
-    // 3. GRID LINES (Optional but helpful)
     svg.append("g")
         .attr("transform", `translate(${margins.left},0)`)
         .attr("class", "grid")
@@ -127,7 +123,6 @@ window.addEventListener("symbolChartLoaded", () => {
         .attr("stroke", "#aaaaaa")
         .attr("stroke-dasharray", "2,2");
 
-    // 4. DRAW GROUPED STACKS
     const yearGroups = svg.append("g")
         .selectAll("g.year-stack")
         .data(dataByYear)
@@ -145,13 +140,11 @@ window.addEventListener("symbolChartLoaded", () => {
         .attr("height", d => yScale(d[0]) - yScale(d[1]))
         .attr("width", xScale.bandwidth());
 
-    // 5. AXES
     const xAxis = d3.axisBottom(xScale)
         .tickValues(years.filter((d, i) => !(i % 2))); // Show every 2nd year for space
 
     const yAxis = d3.axisLeft(yScale);
 
-    // Render X Axis
     svg.append("g")
         .attr("transform", `translate(0,${height - margins.bottom})`)
         .call(xAxis)
@@ -161,7 +154,6 @@ window.addEventListener("symbolChartLoaded", () => {
         .attr("font-size", "12px")
         .attr("fill", "black");
 
-    // Render Y Axis
     svg.append("g")
         .attr("transform", `translate(${margins.left},0)`)
         .call(yAxis)
@@ -169,7 +161,6 @@ window.addEventListener("symbolChartLoaded", () => {
         .attr("font-size", "12px")
         .attr("fill", "black");
 
-    // Y Axis Label
     svg.append("text")
         .attr("transform", "rotate(-90)")
         .attr("y", margins.left / 4)
@@ -178,33 +169,45 @@ window.addEventListener("symbolChartLoaded", () => {
         .attr("font-size", "14px")
         .text(cumulative ? "Cumulative Deaths" : "Total Deaths");
 
-         //legend
+    svg.append("text")
+        .attr("x", width / 2)
+        .attr("y", 15)
+        .attr("text-anchor", "middle")
+        .attr("font-size", "16px")
+        .attr("font-weight", "bold")
+        .text(cumulative ? "Cumulative Deaths Over Time" : "Yearly Deaths Over Time");
 
-        const legend = svg.append("g")
-            .attr("transform", `translate(${90},${23})`);
-        const legendItems = Array.from(new Set(data.map(d => d.side)));
+    svg.append("text")
+        .attr("x", width / 2)
+        .attr("y", height - 10)
+        .attr("text-anchor", "middle")
+        .attr("font-size", "14px")
+        .text("Year");
 
-        legend.selectAll("rect")
-            .data(legendItems)
-            .enter()
-            .append("rect")
-            .attr("y", (d, i) => i % 2 == 0 ? 0 : 20)
-            .attr("x", (d, i) => Math.floor(i / 2) * 80)
-            .attr("width", 20)
-            .attr("height", 15)
-            .attr("fill", d => colorScale(d));
+    const legend = svg.append("g")
+        .attr("transform", `translate(${90},${23})`);
+    const legendItems = Array.from(new Set(data.map(d => d.side)));
 
-        legend.selectAll("text")
-            .data(legendItems)
-            .enter()
-            .append("text")
-            .attr("y", (d, i) => i % 2 == 0 ? 12 : 32)
-            .attr("x", (d, i) => Math.floor(i / 2) * 80 + 25)
-            .attr("fill", "black")
-            .attr("font-size", "12px")
-            .text(d => d);
+    legend.selectAll("rect")
+        .data(legendItems)
+        .enter()
+        .append("rect")
+        .attr("y", (d, i) => i % 2 == 0 ? 0 : 20)
+        .attr("x", (d, i) => Math.floor(i / 2) * 80)
+        .attr("width", 20)
+        .attr("height", 15)
+        .attr("fill", d => colorScale(d));
 
-    //add total stack value labels on top of each stack
+    legend.selectAll("text")
+        .data(legendItems)
+        .enter()
+        .append("text")
+        .attr("y", (d, i) => i % 2 == 0 ? 12 : 32)
+        .attr("x", (d, i) => Math.floor(i / 2) * 80 + 25)
+        .attr("fill", "black")
+        .attr("font-size", "12px")
+        .text(d => d);
+
     yearGroups.append("text")
         .attr("x", xScale.bandwidth() / 2)
         .attr("y", d => yScale(d3.sum(sides, s => {
@@ -219,7 +222,39 @@ window.addEventListener("symbolChartLoaded", () => {
             return segment ? segment[1] - segment[0] : 0;
         }));
     
-    //tooltips
+    if (!cumulative)
+    {
+        function addAnnotation(year, offset, text)
+        {
+            const annotationData = dataByYear.find(d => d.year === year);
+            if (annotationData) {
+                const annotationX = xScale(year) + xScale.bandwidth() / 2;
+                const annotationY = yScale(d3.sum(sides, s => {
+                    const segment = annotationData.find(seg => seg.side === s);
+                    return segment ? segment[1] - segment[0] : 0;
+                })) - 10;
+            
+                svg.append("line")
+                    .attr("x1", annotationX)
+                    .attr("y1", annotationY - 10)
+                    .attr("x2", annotationX + offset.x)
+                    .attr("y2", annotationY + offset.y)
+                    .attr("stroke", "#333333");
+
+                svg.append("text")
+                    .attr("x", annotationX + offset.x - 5)
+                    .attr("y", annotationY + offset.y - 5)
+                    .attr("text-anchor", "middle")
+                    .attr("font-size", "12px")
+                    .attr("fill", "#333333")
+                    .text(text);
+            }
+        }
+
+        addAnnotation(2017, {x: -100, y: -50}, "Rothingya genocide");
+        addAnnotation(2021, {x: -40, y: -80}, "Military coup");
+    }
+
     const tooltip = d3.select("body").append("div")
         .attr("class", "tooltip")
         .style("position", "absolute")
@@ -274,10 +309,10 @@ window.addEventListener("symbolChartLoaded", () => {
         const offset = getOffset(svg.node());
         let xPos = offset.left + xScale(d.year) * 1.1;
         if (d.year > years[Math.floor(years.length / 2)]) {
-            xPos -= (220 + xScale.bandwidth()); //shift left for right half years
+            xPos -= (220 + xScale.bandwidth());
         }
         else{
-            xPos += xScale.bandwidth() + 10; //shift right for left half years
+            xPos += xScale.bandwidth() + 10;
         }
         const yPos = offset.top + 160;
 
