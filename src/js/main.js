@@ -162,7 +162,7 @@ window.addEventListener("dumbbellChartLoaded", () => {
                 e.preventDefault();
                 const target = document.querySelector(this.getAttribute('href'));
                 if (target) {
-                    const offset = 80; // Account for fixed navbar
+                    const offset = 80;
                     const targetPosition = target.offsetTop - offset;
                     window.scrollTo({
                         top: targetPosition,
