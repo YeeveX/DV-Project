@@ -251,7 +251,7 @@ window.addEventListener("symbolChartLoaded", () => {
             }
         }
 
-        addAnnotation(2017, {x: -100, y: -50}, "Rothingya genocide");
+        addAnnotation(2017, {x: -100, y: -50}, "Rohingya genocide");
         addAnnotation(2021, {x: -40, y: -80}, "Military coup");
     }
 
